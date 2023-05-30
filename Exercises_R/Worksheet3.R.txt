@@ -1,0 +1,357 @@
+################ Series Temporais  #########################
+################  Worksheet 3  ##########################
+################   2022/ 2023   ########################
+############################################################
+
+
+require(astsa)
+
+##########################################################
+####### exercise 1a: Generate AR
+###########################
+
+
+##some exercises are proposed in slide 5, sectio 2
+
+
+#window()
+par(mfrow=c(3,2))
+set.seed(5)
+
+############ exercise 1 
+
+####Ex1 i Stationary case
+a=0.8
+sigma=1
+
+ar1=arima.sim(list(order=c(1,0,0),ar=a),n=144,sd=sigma) #simulating
+ar1
+
+plot.ts(ar1, main="Process AR(1),a=0.8,sigma=1")
+
+		#another plot with no lines connecting dots, with the final observation in the x axis
+		#plot.ts(ar1,type="b",axes=F); box(); axis(2)
+		#axis(1,seq(0,144,24))   
+		#title(main="Process AR(1),a=0.8,sigma=1")  
+		#abline(v=seq(0,144,12),lty="dotted")   
+
+
+#another plot with other title and vertical lines
+#plot.ts(ar1,type="b",axes=F); box(); axis(2)
+#axis(1,seq(0,144,24))   
+#title(main=bquote(paste("Example of AR(1)",a==.(a)," ",sigma^2==.(sigma))))   
+#abline(v=seq(0,144,12),lty="dotted")
+
+In the following compare the theoretical values (true) with its estimates
+###acf-theoretical 
+acf_t=ARMAacf(ar=a,ma=0, 35) 
+acf_t
+plot(acf_t, type="h", xlab="lag")#
+abline(h=0)
+
+### acf estimated (sample acf)
+acf_e=acf(ar1,lag.max=35,plot=FALSE)
+acf_e
+plot(acf_e, type="h",col="red", xlab="lag")
+abline(h=0)
+
+### pacf theoretical
+pacf_t=ARMAacf(ar=a,ma=0, 35,pacf=TRUE)
+pacf_t
+plot(pacf_t, type="h", xlab="lag")
+abline(h=0)
+
+### pacf estimated
+pacf_e=pacf(ar1,lag.max=35,plot=FALSE)
+pacf_e
+plot(acf_p, type="h",col="red", xlab="lag")
+abline(h=0)
+
+par(mfrow=c(1,1))
+
+
+
+
+###### ex1 ii Stationary case
+a=-0.8
+sigma=1
+
+par(mfrow=c(3,2))
+
+ar1=arima.sim(list(order=c(1,0,0),ar=a),n=144,sd=sigma) 
+ar1
+
+plot.ts(ar1, main="Process AR(1),a=-0.8,sigma=1")
+
+
+###acf theoretical
+
+acf_t=ARMAacf(ar=a,ma=0, 35) #pacf=FALSE
+acf_t
+par(mfg=c(2,1))
+plot(acf_t, type="h", xlab="lag")#
+abline(h=0)
+
+
+### sample acf 
+acf_e=acf(ar1,lag.max=35,plot=FALSE)
+par(mfg=c(3,1))
+plot(acf_e, type="h",col="red", xlab="lag")
+abline(h=0)
+
+
+
+### pacf theoretical
+pacf_t=ARMAacf(ar=a,ma=0, 35,pacf=TRUE)
+par(mfg=c(2,2))
+plot(pacf_t, type="h", xlab="lag")
+abline(h=0)
+
+### sample pacf 
+acf_p=pacf(ar1,lag.max=35,plot=FALSE)
+par(mfg=c(3,2))
+plot(acf_p, type="h",col="red", xlab="lag")
+abline(h=0)
+
+
+
+##What if we fit an AR(1) to this simulated data?
+x.fit<- arima(ar1, order=c(1,0,0))
+x.fit #AR coefficient is similar to a=-0.8?
+
+
+## GEt the roots of autoregressive polynomial: (1/a)
+z=c(1,0.8) # Coefficients of the polynomial
+polyroot(z)  #-1.25+0i
+# a=1/-1.25=-0.8
+
+
+par(mfrow=c(1,1))
+
+
+
+
+########  Ex 1 iii  Non stationary case -Equivalent to a random walk, it must be generated in other way
+par(mfrow=c(3,1))
+a=1
+sigma=0.5
+
+w=rnorm(500,0,0.5)
+w[1]
+x<- numeric(500)
+
+x[1]<-w[1]
+for (i in c(2:500)){
+x[i]=a*x[i-1]+w[i]
+}
+
+#plot.ts(x[1:500])
+#title(main=bquote(paste("AR(1) trajectory  ",a==.(a)," ",sigma^2==.(sigma))))
+
+plot.ts(x[1:500])
+title(main="Process AR(1),a=1,sigma=0.5")
+
+
+#Does make sense to calculate  theoretical acf???
+#No since it is not a stationary process
+
+### sample acf 
+acf_e=acf(ar1,lag.max=35,plot=FALSE)
+par(mfg=c(2,1))
+plot(acf_e, type="h",col="red", xlab="lag")
+abline(h=0)
+
+### sample pacf 
+acf_p=pacf(ar1,lag.max=35,plot=FALSE)
+par(mfg=c(3,1))
+plot(acf_p, type="h",col="red", xlab="lag")
+abline(h=0)
+
+par(mfrow=c(1,1))
+
+
+
+### Ex 1 iv Non stationary case 
+
+par(mfrow=c(2,2))
+a=1.5
+sigma=0.5
+x<- numeric(500)
+
+w=rnorm(500,0,0.5)
+x[1]=w[1]
+for (i in c(2:500)){
+x[i]=a*x[i-1]+w[i]
+}
+
+x
+par(mfg=c(1,1))
+plot.ts(x[1:20])
+title(main="Process AR(1),a=1.5,sigma=2")
+
+par(mfg=c(1,2))
+plot.ts(x[1:500])
+#title(main=bquote(paste("Exemplo de processo AR(1) ",a==.(a)," ",sigma^2==.(sigma))))
+title(main="Process AR(1),a=1.5,sigma=2")
+
+
+acf_p=acf(ar1,lag.max=35,plot=FALSE)
+par(mfg=c(2,1))
+plot(acf_p, type="h",col="red", xlab="lag")
+abline(h=0)
+
+
+acf_p=pacf(ar1,lag.max=35,plot=FALSE)
+par(mfg=c(2,2))
+plot(acf_p, type="h",col="red", xlab="lag")
+abline(h=0)
+
+
+
+
+#####################################################
+#Exercise 1b: Moving Average
+####################################################
+
+par(mfrow=c(3,2))
+#set.seed(5)
+
+#b=0.9 #leads to a large value for the acf(1)
+#sigma=2
+b=-0.9
+#sigma=2
+
+#b=.1 # gives first value of acf small
+sigma=2
+
+
+ma1=arima.sim(list(order=c(0,0,1),ma=b),n=144,sd=sigma)
+
+plot.ts(ma1,main="Simulação ARMA, ma=b,sigma=2")
+	#plot.ts(ma1,type="b",axes=F); box(); axis(2)
+	#axis(1,seq(0,144,24))
+	#title(main=bquote(paste("Processo MA(1) ",b==.(b)," ",sigma^2==.(sigma))))
+	#abline(v=seq(0,144,12),lty="dotted")
+
+
+par(mfg=c(2,1))
+acf_t=ARMAacf(ar=0,ma=b, 35) #pacf=TRUE
+plot(acf_t, type="h", xlab="lag")
+abline(h=0)
+
+
+par(mfg=c(3,1))
+acf_e=acf(ma1,lag.max=35,plot=FALSE)
+plot(acf_e, type="h",col="red", xlab="lag")
+abline(h=0)
+
+
+par(mfg=c(2,2))
+pacf_t=ARMAacf(ar=0,ma=b, 35,pacf=TRUE)
+plot(pacf_t, type="h", xlab="lag")
+abline(h=0)
+
+
+par(mfg=c(3,2))
+acf_p=pacf(ma1,lag.max=35,plot=FALSE)
+plot(acf_p, type="h",col="red", xlab="lag")
+abline(h=0)
+
+
+###### Non invertible situation, but stationary 
+
+
+b=1
+sigma=2
+
+
+par(mfrow=c(2,2))
+
+w=rnorm(40,0,2)
+x[1]=w[1]
+for (i in c(2:40)){
+x[i]=b*w[i-1]+w[i]
+}
+
+plot.ts(x[1:40])
+title(main="Process MA(1),b=1,sigma=2")
+
+
+par(mfg=c(2,1))
+acf_p=acf(ma1,lag.max=35,plot=FALSE)
+plot(acf_p, type="h",col="red", xlab="lag")
+abline(h=0)
+
+
+par(mfg=c(2,2))
+acf_p=pacf(ma1,lag.max=35,plot=FALSE)
+plot(acf_p, type="h",col="red", xlab="lag")
+abline(h=0)
+
+par(mfrow=c(1,1))
+
+#####################################################
+#ARMA
+####################################################
+
+
+
+#window()
+par(mfrow=c(3,2))
+set.seed(5)
+
+a=0.8
+#a=-0.8
+b=0.9
+#b=-0.9
+sigma=0.5
+
+arma1=arima.sim(list(order=c(1,0,1),ar=a,ma=b),n=144,sd=sigma)
+
+plot.ts(ma1, main="ARMA(1,1),ar=a,ma=b, sigma=0.5")
+
+	#plot.ts(ma1,type="b",axes=F); box(); axis(2)
+	#axis(1,seq(0,144,24))
+	#title(main=bquote(paste("Processo ARMA(1) ",a==.(a)," ",b==.(b)," ",sigma==.(sigma))))
+	#abline(v=seq(0,144,12),lty="dotted")
+
+par(mfg=c(2,1))
+acf_t=ARMAacf(ar=a,ma=b, 35) 
+plot(acf_t, type="h", xlab="lag")
+abline(h=0)
+
+par(mfg=c(3,1))
+acf_e=acf(arma1,lag.max=35,plot=FALSE)
+plot(acf_e, type="h",col="red", xlab="lag")
+abline(h=0)
+
+par(mfg=c(2,2))
+pacf_t=ARMAacf(ar=a,ma=b, 35,pacf=TRUE)
+plot(pacf_t, type="h", xlab="lag")
+abline(h=0)
+
+par(mfg=c(3,2))
+acf_p=pacf(arma1,lag.max=35,plot=FALSE)
+plot(acf_p, type="h",col="red", xlab="lag")
+abline(h=0)
+
+
+
+#################################
+#############################
+
+
+###Exercise 3
+
+###### ex3 a 
+#causal model (stationary) 
+ARMAtoMA(ar=0.5,ma=0,10)
+
+###### ex3 d 
+# causal model_  x_t=0.9x_(t-1)+0.5w_(t-1)+w_t
+ARMAtoMA(ar=0.9,ma=0.5, 10) 
+
+#invertible model, w_t=-0.5w_(t-1)+x_t-0.9x_(t-1)
+ARMAtoMA(ar=-0.5,ma=-0.9, 10) 
+
+
