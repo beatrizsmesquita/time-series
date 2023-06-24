@@ -15,4 +15,4 @@ The evaluation has two moments: one test (T) and a Project (P) evolving a time s
 Final mark is given by: FM=0.5T+0.5P 
 
 
-FINAL GRADE: Test:17.2; Project (**TO BE DELIVERED**). FINAL MARK: (**TO BE CALCULATED**)
+FINAL GRADE: Test:17.2; Project:18. FINAL MARK: 18.
